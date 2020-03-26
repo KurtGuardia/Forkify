@@ -33,6 +33,7 @@ const controlSearch = async () => {
         //5) Render results on UI
         clearLoader();
         searchView.renderResults(state.search.result);        //state.search.result is an array that we get thanks to the method getResults(), and contains all the results of the search. We pass it to the renderResults that we made in the other module
+        
     }
 }
 
@@ -41,3 +42,12 @@ elements.searchForm.addEventListener('submit', e => {
     controlSearch();
 })
 
+elements.searchResPages.addEventListener('click', e => {        //searchResPages is the parent of where we put the buttons
+    const btn = e.target.closest('.btn-inline');                //.closest gives us the element with the specified class closest to where we clicked (so no problem on clicking the letters or the icon inside the button, we always get the button)
+
+    if(btn){
+        const goToPages = parseInt(btn.dataset.goto, 10);       //goto is the dataset we made for the respective button, so it tells us what that button is made for
+        searchView.clearResults();                              //So the new results don't drop off under the first results, and also erase the button we just clicked
+        searchView.renderResults(state.search.result, goToPages);       //Same as step 5 in controlSearch, but with the new page attached as the second argument
+    }
+})

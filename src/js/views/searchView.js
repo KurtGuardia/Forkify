@@ -13,6 +13,7 @@ export const clearInput = () => {                   //takes the input field and 
 
 export const clearResults = () => {                  //Grabs the whole list displayed and turns it to blank
     elements.searchResList.innerHTML = '';
+    elements.searchResPages.innerHTML = '';
 }
 
 const limitRecipeTitle = (title, limit = 17) => {   //A well-thought algoritm for the titles to not be more than one line in the interface
@@ -48,8 +49,46 @@ const renderRecipe = recipe => {
     elements.searchResList.insertAdjacentHTML('beforeend', markup)         //Here we put the markup with each and every result in its place in the DOM
 }
 
-export const renderResults = recipes => {           //Here we will get all the recipies to work with
+//type: 'next' of 'prev'
+const createButton = (page, type) => `
+    <button class="btn-inline results__btn--${type}" data-goto = ${type === 'prev' ? page - 1 : page + 1}>
+        <span>Page ${type === 'prev' ? page - 1 : page + 1}</span>    
+        <svg class="search__icon">
+            <use href="img/icons.svg#icon-triangle-${type === 'prev' ? 'left' : 'right' }"></use>
+        </svg>
+    </button>
+                
+`;
 
-    recipes.forEach(renderRecipe);                  //There's no need to specify the element or anything, just passing the function it will work for all of the elements in the array each by one
+const renderButtons = (page, numResults, resPerPage) => {
+    const pages = Math.ceil(numResults / resPerPage)                        //To get how many pages will be needed, using method .ceil because we always need the upper number 
 
+    let button;
+    if(page === 1 && pages > 1){
+        //Only button to go to next page
+        button  = createButton(page, 'next');
+    } else if (page < pages) {
+        //Both buttons, this is done by making a string with both function calls
+        button  = `
+            ${createButton(page, 'prev')}
+            ${createButton(page, 'next')}
+        `;
+    } else if (page === pages && pages > 1){
+        //Only button to go to prev page
+        button  = createButton(page, 'prev');
+    }
+
+    elements.searchResPages.insertAdjacentHTML('afterbegin', button);
+}
+
+export const renderResults = (recipes, page = 1, resPerPage = 10) => {     //Here we will get all the recipies to work with
+
+    //Render Results of current page
+    const start = (page -1) * resPerPage;           //Because it's zero-based starts in 0, then next page with a 1 in page we'll get a 10 then a 20
+    const end = page * resPerPage;                  //Easy way to get 10, 20 and 30 (slice doesn't take them into account)
+
+    recipes.slice(start, end).forEach(renderRecipe);                  //There's no need to specify the element or anything, just passing the function it will work for all of the elements in the array each by one
+
+    //Render pagination button
+    renderButtons(page, recipes.length, resPerPage);
 }
