@@ -1,7 +1,7 @@
 import Search from './models/Search';
 import * as searchView from './views/searchView';
 import { elements, renderLoader, clearLoader } from './views/base';
-
+import Recipe from './models/Recipe';
 
 
 /** Global state of the app 
@@ -11,6 +11,10 @@ import { elements, renderLoader, clearLoader } from './views/base';
  * - Liked recipes
 */
 const state = {};
+
+/**
+ * Search Stuff (left side)
+ */
 
 const controlSearch = async () => {
     
@@ -27,6 +31,7 @@ const controlSearch = async () => {
         searchView.clearResults();
         renderLoader(elements.searchRes)
 
+        try{
         //4) Search for recipes
         await state.search.getResults();            //This method returns a Promise and in step 5) we need the results to be compleated, that's why we need to wait this method to be done
 
@@ -34,6 +39,10 @@ const controlSearch = async () => {
         clearLoader();
         searchView.renderResults(state.search.result);        //state.search.result is an array that we get thanks to the method getResults(), and contains all the results of the search. We pass it to the renderResults that we made in the other module
         
+        } catch (error) {
+            alert('Something went wrong :(')
+            clearLoader();
+        }
     }
 }
 
@@ -51,3 +60,42 @@ elements.searchResPages.addEventListener('click', e => {        //searchResPages
         searchView.renderResults(state.search.result, goToPages);       //Same as step 5 in controlSearch, but with the new page attached as the second argument
     }
 })
+
+/**
+ * Recipe stuff (front of browser) 
+ */
+const  controlRecipe = async() => {
+    //Get ID from the url
+    const id = window.location.hash.replace('#', '');
+    console.log(id);
+
+    //Pretty much do everythinh
+    if(id) {
+
+        //Prepare UI for changes
+
+        //Create new recipe object
+        state.recipe = new Recipe(id);
+
+        try {
+        //Get recipe data
+        await state.recipe.getRecipe();
+
+        //Calculate servings and time
+        state.recipe.calcTime();
+        state.recipe.calcServing();
+
+        //Render recipe
+        console.log(state.recipe);
+
+        } catch (error) {
+            alert('Something went wrong :(')
+        }
+    }
+}
+
+
+
+
+
+['hashchange', 'load'].forEach(event => window.addEventListener(event, controlRecipe));
