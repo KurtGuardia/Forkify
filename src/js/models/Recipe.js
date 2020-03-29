@@ -94,6 +94,18 @@ export default class Recipe {
         this.ingredients = newIngredients
     }
 
+    updateServings(type) {
+        //Servings
+        const newServings = type === 'dec' ? this.servings - 1 : this.servings + 1;         //Here we store the new serving depending on if it is 'dec' or not
+
+        //Ingredients
+        this.ingredients.forEach(ing => {
+            ing.count *= (newServings / this.servings)                                      //we mutate de .count proprety on that object by multiplying for the new varaible (0.75 [3/4] if we change form 4 to 3) 
+        })
+
+        //This is set up last so it does't bother the forEach loop 
+        this.servings = newServings;
+    }
 
 
 

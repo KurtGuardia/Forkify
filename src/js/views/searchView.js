@@ -16,6 +16,17 @@ export const clearResults = () => {                  //Grabs the whole list disp
     elements.searchResPages.innerHTML = '';
 }
 
+export const highlightSelected = (id) => {
+    const resultsArr = Array.from(document.querySelectorAll('.results__link'));
+    resultsArr.forEach(el => {
+        el.classList.remove('results__link--active');
+    });
+
+    document
+    .querySelector(`a[href="#${id}"]`)
+    .classList.add('results__link--active');
+}
+
 const limitRecipeTitle = (title, limit = 17) => {   //A well-thought algoritm for the titles to not be more than one line in the interface
     const newTitle = [];                            //We create an empty array for the new title
     if (title.length > limit) {                     //check if the title is longer than the established limit we put ourselves

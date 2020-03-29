@@ -1,11 +1,30 @@
 import { elements } from "./base";
+import { Fraction } from 'fractional';
 
+const formatCount = count => {
+    if(count){
+        const [int, dec] = count.toString().split('.').map(el => parseInt(el, 10));
+
+        if(!dec) return count;
+
+        if(int === 0) {
+            const fr = new Fraction(count);
+            return `${fr.numerator}/${fr.denominator}`
+        } else {
+            const fr = new Fraction(count - int);
+            return `${int} ${fr.numerator}/${fr.denominator}`
+        }
+    }
+    return '?';
+}
+
+//To be called for each and every ingredient there is on the recipe, how many each recipe has
 const createIngredient = ingredient =>  `
     <li class="recipe__item">
         <svg class="recipe__icon">
             <use href="img/icons.svg#icon-check"></use>
         </svg>
-        <div class="recipe__count">${ingredient.count}</div>
+        <div class="recipe__count">${formatCount(ingredient.count)}</div>
         <div class="recipe__ingredient">
             <span class="recipe__unit">${ingredient.unit}</span>
             ${ingredient.ingredients}
@@ -13,11 +32,14 @@ const createIngredient = ingredient =>  `
     </li>
 `;
 
+//So we we clear the recipe when calling for another
 export const clearRecipe = () => {
     elements.recipe.innerHTML = '';
 }
 
+//The master funcion of this module, to render the recipe
 export const renderRecipe = recipe => {
+    //Each img url, title, author, url will be replaces for the respective object we get from the object created with the class made un Recipe.js
     const markup = `
     <figure class="recipe__fig">
         <img src="${recipe.img}" alt="${recipe.title}" class="recipe__img">
@@ -41,12 +63,12 @@ export const renderRecipe = recipe => {
             <span class="recipe__info-text"> servings</span>
 
             <div class="recipe__info-buttons">
-                <button class="btn-tiny">
+                <button class="btn-tiny btn-decrease">
                     <svg>
                         <use href="img/icons.svg#icon-circle-with-minus"></use>
                     </svg>
                 </button>
-                <button class="btn-tiny">
+                <button class="btn-tiny btn-increase">
                     <svg>
                         <use href="img/icons.svg#icon-circle-with-plus"></use>
                     </svg>
@@ -92,5 +114,16 @@ export const renderRecipe = recipe => {
     </div>
     `;
 
+    //this is to specify where all the code above should be put
     elements.recipe.insertAdjacentHTML('afterbegin', markup);
+}
+
+export const updateServingsIngredients = recipe => {
+    //servings
+    document.querySelector('.recipe__count').textContent = recipe.servings
+    //ingredients
+    const countElements = Array.from(document.querySelectorAll('.recipe__count'));
+    countElements.forEach((el, i) => {
+        el.textContent = formatCount(recipe.ingredients[i].count)
+    })
 }

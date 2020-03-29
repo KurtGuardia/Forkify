@@ -65,14 +65,18 @@ elements.searchResPages.addEventListener("click", e => {
 const controlRecipe = async () => {
   //Get ID from the url
   const id = window.location.hash.replace("#", "");
-  console.log(id);
 
+  
   //Pretty much do everythinh
   if (id) {
     
     //Prepare UI for changes
     recipeView.clearRecipe();
     renderLoader(elements.recipe);
+
+    //Highlight selected search item
+    if (state.search) searchView.highlightSelected(id);
+
     //Create new recipe object
     state.recipe = new Recipe(id);
 
@@ -95,6 +99,21 @@ const controlRecipe = async () => {
   }
 };
 
-["hashchange", "load"].forEach(event =>
+["hashchange", "load"].forEach(event =>           //hashchange looks for change at the end of the url, this happens when we click into another recipe, and load for when we initialize the page.
   window.addEventListener(event, controlRecipe)
 );
+
+elements.recipe.addEventListener('click', e=> {
+  if(e.target.matches('.btn-decrease, .btn-decrease *')){
+    //Decrease button clicked
+    if(state.recipe.servings > 1) {
+    state.recipe.updateServings('dec');
+    recipeView.updateServingsIngredients(state.recipe);
+    }
+  } else if(e.target.matches('.btn-increase, .btn-increase *')){
+    //Increase button clicked
+    state.recipe.updateServings('inc');
+    recipeView.updateServingsIngredients(state.recipe);
+  }
+  console.log(state.recipe);
+});
