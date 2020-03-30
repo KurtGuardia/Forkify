@@ -90,7 +90,7 @@ export const renderRecipe = recipe => {
             ${recipe.ingredients.map(el => createIngredient(el)).join(' ')}
         </ul>
 
-        <button class="btn-small recipe__btn">
+        <button class="btn-small recipe__btn recipe__btn--add">
             <svg class="search__icon">
                 <use href="img/icons.svg#icon-shopping-cart"></use>
             </svg>
@@ -118,12 +118,16 @@ export const renderRecipe = recipe => {
     elements.recipe.insertAdjacentHTML('afterbegin', markup);
 }
 
+
+//Function to use when the user changes the quantity in servings
 export const updateServingsIngredients = recipe => {
+
     //servings
-    document.querySelector('.recipe__count').textContent = recipe.servings
+    document.querySelector('.recipe__info-data--people').textContent = recipe.servings              //picks the place where de servings is shown in the fist time and changes it for the new servings ammount
+    
     //ingredients
-    const countElements = Array.from(document.querySelectorAll('.recipe__count'));
+    const countElements = Array.from(document.querySelectorAll('.recipe__count'));                  //Gathers all the elements that have the recipe_count class, which are the ingredients in the place where they are calculated based on this info, the servings
     countElements.forEach((el, i) => {
-        el.textContent = formatCount(recipe.ingredients[i].count)
+        el.textContent = formatCount(recipe.ingredients[i].count)                                   //To store and show the new count property on the ingredients object in each one
     })
 }
