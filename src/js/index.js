@@ -5,6 +5,8 @@ import { elements, renderLoader, clearLoader } from "./views/base";
 import Recipe from "./models/Recipe";
 import List from './models/List';
 import * as listView from './views/listView';
+import Likes from './models/Likes';
+import * as likesView from './views/likesView'
 
 
 /** Global state of the app
@@ -14,6 +16,7 @@ import * as listView from './views/listView';
  * - Liked recipes
  */
 const state = {};
+
 
 /**
  * Search Stuff (left side)
@@ -94,7 +97,8 @@ const controlRecipe = async () => {
 
       //Render recipe
       clearLoader();
-      recipeView.renderRecipe(state.recipe);
+      recipeView.renderRecipe(state.recipe, state.likes.isLiked(id)
+);
     } catch (error) {
       //alert("Something went wrong :(");
       console.log(error);
@@ -110,20 +114,61 @@ const controlRecipe = async () => {
  * Shopping List (right side)
  */
 const controlList = () => {
-  if(!state.list) state.list = new List();
-  state.recipe.ingredients.forEach(el => {
-    const item = state.list.addItem(el.count, el.unit, el.ingredients);
-    listView.renderItem(item);
+  if(!state.list) state.list = new List();                                  //If there is no shopping list create a new one
+  state.recipe.ingredients.forEach(el => {                                  //Reads the recipe we are seeing goes to the ingredients parte and performs a loop on each one
+    const item = state.list.addItem(el.count, el.unit, el.ingredients);     //On each ingredient (el) gets its .count, .unit, .ingredient property as the arguments of addItem on the list object we created, all are saved in a variable
+    listView.renderItem(item);                                              //Call the renderItem method from listView with the argument of the item just created above
   })
 }
 
+
+/**
+ * Likes (right side)
+ */
+const controlLike = () =>{
+  if(!state.likes) state.likes = new Likes();                               //If there are no likes, create the Likes object
+  const currentID = state.recipe.id;                                        //Store the id of the recipe, for easier use
+  
+  if (!state.likes.isLiked(currentID)){                                     //If the current recipe is not like to the following
+    //Add likes to state
+    const newLike = state.likes.addLike(currentID, state.recipe.title, state.recipe.author, state.recipe.img);
+    //Toggle heart likes button
+    likesView.toggleLikeBtn(true)
+    //Add to UI
+    likesView.renderLike(newLike);
+  } else {
+    //Remove like to state
+    state.likes.deleteLike(currentID);
+    //Toggle heart likes button
+    likesView.toggleLikeBtn(false)
+    //Remove to UI
+    likesView.deleteLike(currentID);
+  }
+
+  likesView.toggleLikeMenu(state.likes.getNumLikes());                      //If there was a like (so at least there is one) toggle the button
+}
+
+window.addEventListener('load', () => {                                     //Action for when we reload the page and want the likes we gave to still be shown
+  state.likes = new Likes();                                                //Create the likes obj
+  state.likes.readStorage();                                                //Read the localStorage to see if there is anything
+  likesView.toggleLikeMenu(state.likes.getNumLikes());                      //Toggle in case there is
+  state.likes.likes.forEach(like => likesView.renderLike(like));            //for every like there is in localStorage, render it
+})
+
 //Handling shopping list buttons
 elements.shopping.addEventListener('click', e => {
-  const item = e.target.closest('.shopping__list').dataset.itemid;
-  if (e.target.matches('.shopping__delete, .shopping__delete *')) {
-    state.list.deleteItem(item);
+  const id = e.target.closest('.shopping__item').dataset.itemid;            //To store the id of the object clicked
+
+  if (e.target.matches('.shopping__delete, .shopping__delete *')) {         //Check if the button was the delete one
+    //delete from state
+    state.list.deleteItem(id);
+    //delete from UI
+    listView.deleteItem(id)
+  }else if (e.target.matches('.shopping__list--value')){                    //Check if the place was on the numbers of amount
+    const val = parseFloat(e.target.value, 10);                             //Read the new value og the amount number
+    state.list.updateCount(id, val);                                        //function to update the new count value
   }
-  listView.deleteItem(item)
+  
 })
 
 //Handling recipe button clicks
@@ -138,10 +183,9 @@ elements.recipe.addEventListener('click', e=> {                     //the place 
     //Increase button clicked
     state.recipe.updateServings('inc');
     recipeView.updateServingsIngredients(state.recipe);
-  } else if (e.target.matches('.recipe__btn--add, .recipe__btn--add *')){
+  } else if (e.target.matches('.recipe__btn--add, .recipe__btn--add *')){     //The button "Add to Shopping Cart" clicked
     controlList();
+  } else if (e.target.matches('.recipe__love, .recipe__love *')){             //The heart button "Like" clicked
+    controlLike();
   }
-  console.log(state.recipe);
 });
-
-window.l = new List();

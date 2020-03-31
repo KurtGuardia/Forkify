@@ -23,11 +23,11 @@ export const highlightSelected = (id) => {
     });
 
     document
-    .querySelector(`a[href="#${id}"]`)
+    .querySelector(`.results__link[href="#${id}"]`)
     .classList.add('results__link--active');
 }
 
-const limitRecipeTitle = (title, limit = 17) => {   //A well-thought algoritm for the titles to not be more than one line in the interface
+export const limitRecipeTitle = (title, limit = 17) => {   //A well-thought algoritm for the titles to not be more than one line in the interface
     const newTitle = [];                            //We create an empty array for the new title
     if (title.length > limit) {                     //check if the title is longer than the established limit we put ourselves
         title.split(' ').reduce((acc, cur) => {     //split the title in individual words. This produces an Array so we can pass the method .reduce
